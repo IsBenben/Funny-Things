@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>5277论证器</title>
+    <meta name="description" content="将数字通过5277来表示" />
+    <meta name="keyword" content="tree,5277,数学,论证" />
+    <style>
+      body {
+        text-align: center;
+        background-color: #527;
+        color: white;
+        transition: background-color 0.5s ease;
+        padding-top: 100px;
+      }
+      .has-num {
+        background-color: #725;
+      }
+      input {
+        background-color: inherit;
+        color: inherit;
+        text-align: inherit;
+        border: 1px solid white;
+        outline: none;
+        padding: 8px;
+        font-size: 1.5em;
+      }
+      #result {
+        font-size: 2em;
+      }
+      p {
+        padding-left: 10vw;
+        padding-right: 10vw;
+      }
+    </style>
+  </head>
+  <body class="no-num">
+    <script>
+      /*
+      MIT License
+
+      Copyright (c) 2020 https://github.com/itorr/homo
+
+      Permission is hereby granted, free of charge, to any person obtaining a copy
+      of this software and associated documentation files (the "Software"), to deal
+      in the Software without restriction, including without limitation the rights
+      to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+      copies of the Software, and to permit persons to whom the Software is
+      furnished to do so, subject to the following conditions:
+
+      The above copyright notice and this permission notice shall be included in all
+      copies or substantial portions of the Software.
+
+      THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+      IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+      FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+      AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+      LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+      OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+      SOFTWARE.
+      */
+
+      const homo = ((Nums) => {
+        const numsReversed = Object.keys(Nums)
+          .map((x) => +x)
+          .filter((x) => x > 0);
+        const getMinDiv = (num) => {
+          for (let i = numsReversed.length; i >= 0; i--)
+            if (num >= numsReversed[i]) return numsReversed[i];
+        };
+        const isDotRegex = /\.(\d+?)0{0,}$/;
+        const demolish = (num) => {
+          if (typeof num !== 'number') return '';
+
+          if (num === Infinity || Number.isNaN(num))
+            return `这么恶臭的${num}有必要论证吗`;
+
+          if (num < 0)
+            return `(⑨)*(${demolish(num * -1)})`.replace(/\*\(1\)/g, '');
+
+          if (!Number.isInteger(num)) {
+            // abs(num) is definitely smaller than 2**51
+            // rescale
+            const n = num.toFixed(16).match(isDotRegex)[1].length;
+            if (n !== 1) {
+              return `(${demolish(num * Math.pow(10, n))})/(10)^(${n})`;
+            }
+            return `(${demolish(num * Math.pow(10, n))})/(10)`;
+          }
+
+          if (Nums[num]) return String(num);
+
+          const div = getMinDiv(num);
+          return (
+            `${div}*(${demolish(Math.floor(num / div))})+` +
+            `(${demolish(num % div)})`
+          ).replace(/\*\(1\)|\+\(0\)$/g, '');
+        };
+        //Finisher
+        const finisher = (expr) => {
+          expr = expr.replace(/\d+|⑨/g, (n) => Nums[n]).replace('^', '**');
+          //As long as it matches ([\*|\/])\(([^\+\-\(\)]+)\), replace it with $1$2
+          while (expr.match(/[\*|\/]\([^\+\-\(\)]+\)/))
+            expr = expr.replace(
+              /([\*|\/])\(([^\+\-\(\)]+)\)/,
+              (m, $1, $2) => $1 + $2
+            );
+          //As long as it matches ([\+|\-])\(([^\(\)]+)\)([\+|\-|\)]), replace it with $1$2$3
+          while (expr.match(/[\+|\-]\([^\(\)]+\)[\+|\-|\)]/))
+            expr = expr.replace(
+              /([\+|\-])\(([^\(\)]+)\)([\+|\-|\)])/,
+              (m, $1, $2, $3) => $1 + $2 + $3
+            );
+          //As long as it matches ([\+|\-])\(([^\(\)]+)\)$, replace it with $1$2
+          while (expr.match(/[\+|\-]\(([^\(\)]+)\)$/))
+            expr = expr.replace(
+              /([\+|\-])\(([^\(\)]+)\)$/,
+              (m, $1, $2) => $1 + $2
+            );
+          //If there is a bracket in the outermost part, remove it
+          if (expr.match(/^\([^\(\)]+?\)$/))
+            expr = expr.replace(/^\(([^\(\)]+)\)$/, '$1');
+
+          expr = expr.replace(/\+-/g, '-');
+          return expr;
+        };
+        return (num) => finisher(demolish(num));
+      })({
+        0: '5277-5277',
+        1: '5277/5277',
+        2: '(5+2+7)/7',
+        3: '5-2+7-7',
+        4: '5-2+7/7',
+        5: '5+2*(7-7)',
+        6: '5+2-7/7',
+        7: '5+2+7-7',
+        8: '(5+2)/7+7',
+        9: '5*2-7/7',
+        10: '5*2+7-7',
+        11: '5*2+7/7',
+        12: '5+2*7-7',
+        14: '(5-2)*7-7',
+        15: '5*(2+7/7)',
+        16: '5*(2+7/7)+5277/5277',
+        17: '5-2+7+7',
+        21: '5+2+7+7',
+        24: '5*2+7+7',
+        25: '5+27-7',
+        26: '5+2*7+7',
+        28: '(5-2)*7+7',
+        33: '(5-2/7)*7',
+        35: '5/2*(7+7)',
+        37: '(5+2/7)*7',
+        38: '5*(2+7)-7',
+        39: '5+27+7',
+        40: '5-(2-7)*7',
+        42: '(5+2)*7-7',
+        51: '52-7/7',
+        52: '5-2+7*7',
+        53: '52+7/7',
+        56: '(5+2)*7+7',
+        59: '5*2+7*7',
+        63: '5*2*7-7',
+        66: '52+7+7',
+        68: '5+(2+7)*7',
+        70: '(5-2+7)*7',
+        77: '5*2*7+7',
+        80: '5*(2+7+7)',
+        84: '5+2+77',
+        87: '5*2+77',
+        98: '(5+2+7)*7',
+        100: '5*(27-7)',
+        101: '52+7*7',
+        103: '5+2*7*7',
+        105: '5*(2*7+7)',
+        119: '(5*2+7)*7',
+        128: '5*27-7',
+        129: '52+77',
+        133: '(5+2*7)*7',
+        140: '5*2*(7+7)',
+        142: '5*27+7',
+        147: '(5-2)*7*7',
+        159: '5+2*77',
+        170: '5*(27+7)',
+        194: '5+27*7',
+        224: '(5+27)*7',
+        231: '(5-2)*77',
+        255: '5*(2+7*7)',
+        282: '5+277',
+        315: '5*(2+7)*7',
+        343: '(5+2)*7*7',
+        357: '52*7-7',
+        371: '52*7+7',
+        395: '5*(2+77)',
+        413: '(52+7)*7',
+        490: '5*2*7*7',
+        520: '527-7',
+        534: '527+7',
+        539: '(5+2)*77',
+        728: '52*(7+7)',
+        770: '5*2*77',
+        945: '5*27*7',
+        1385: '5*277',
+        2548: '52*7*7',
+        3689: '527*7',
+        4004: '52*77',
+        5277: '5277',
+        '⑨': '(5*2-7-7)/(5-2+7/7)',
+      });
+    </script>
+    <h1>5277论证器</h1>
+    <input type="number" id="num" placeholder="输入任意数字" />
+    <p id="result"></p>
+    <script>
+      num.addEventListener('input', () => {
+        if (num.value === '') {
+          result.textContent = '';
+          document.body.className = 'no-num';
+        } else {
+          result.textContent = `${+num.value}=${homo(+num.value)}`;
+          document.body.className = 'has-num';
+        }
+      });
+    </script>
+  </body>
+</html>
