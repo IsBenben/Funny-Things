@@ -1,3 +1,24 @@
+"""
+Copyright 2024 IsBenben
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the “Software”), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+"""
+
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from PIL import Image, ImageDraw, ImageFont, ImageTk, UnidentifiedImageError
@@ -68,10 +89,10 @@ def get_text_colors(font_size=8, texts=tuple(all_chars)):
         for y in range(font_size):
             for x in range(font_size):
                 sum_num += image.getpixel((x, y))
-        
+
         avg_num = sum_num / (font_size * font_size * 1.375)
         text_colors.setdefault(avg_num, list()).append(text)
-    
+
     # 排序颜色 高->低
     sorted_text_colors = sorted(text_colors.items(), key=lambda item: item[0])
     return list(sorted_text_colors)
@@ -138,7 +159,7 @@ class Window(tk.Tk):
         self.start_button = ttk.Button(self, text='开 始', command=self.start_func, width=20, padding=3)
         self.start_button.pack(padx=10, pady=10)
         self.process = ttk.Progressbar(self, orient=tk.HORIZONTAL, length=330, mode='determinate')
- 
+
     def select_input_file_func(self):
         filename = filedialog.askopenfilename(filetypes=[('图片文件', '*.bmp *.jpg *.jpeg *.png *.webp'), ('所有文件', '*.*')])
 
@@ -167,7 +188,7 @@ class Window(tk.Tk):
             else:
                 self.input_file_preview.config(image='')
         self.after('idle', _inner)
-    
+
     def toggle_state(self, state):
         self.input_select_button.config(state=state)
         self.input_filename_entry.config(state=state)
@@ -195,13 +216,13 @@ class Window(tk.Tk):
         if not image:
             self.end_func()
             return None
-        
+
         f = open_file(os.path.join(path, out_file), 'w', encoding='utf-8')
         if not f:
             self.end_func()
             messagebox.showerror('错误', '未选择输出文件！')
             return None
-        
+
         # 获取文字颜色
         if self.output_texts_var.get() == 'all':
             sorted_text_colors = get_text_colors()
@@ -217,7 +238,7 @@ class Window(tk.Tk):
         # 预处理图片
         scale = safe_float(self.input_scale_entry.get(), 1.0)
         rotate = self.input_rotate_select.current() * 90
-        
+
         rgb_image = image.convert('RGB')
         rotated_image = rgb_image.rotate(rotate, expand=True)
         rotated_image_w, rotated_image_h = rotated_image.size
@@ -247,7 +268,7 @@ class Window(tk.Tk):
                     self.process.configure(value=processed_count)
                     self.update()
             f.write('\n')
-        
+
         messagebox.showinfo('信息', f'转换完成，耗时 {time.time() - start:.2f} 秒，请在文件中查看！')
         self.end_func()
 
